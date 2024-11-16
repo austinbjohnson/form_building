@@ -1,0 +1,161 @@
+$(document).ready(function() {
+    // Function to generate a unique session ID
+    function generateSessionId() {
+        return 'session-' + new Date().getTime() + '-' + Math.floor(Math.random() * 10000);
+    }
+
+    // Generate a unique session ID for this page load
+    var sessionId = generateSessionId();
+
+    // Hide the original submit button
+    $('button[type="submit"]').hide();
+
+    // Create and insert a new button for triggering the AJAX request
+    var newButton = $('<button type="button" class="button is-primary is-pulled-right">Send Chat</button>');
+
+    // Create the chat window content as a jQuery object 
+    var chatWindowSection = $(
+        `<section id="chat-window" class="box form-control">
+            <!-- Placeholder content -->
+            <div class="chat-message chat-response placeholder" style="align-self: flex-end;">
+                <p>Let's Get a demo going!</p>
+            </div>
+
+        </section>`
+        
+    );
+   
+
+    // Create the helper prompts section
+    var helperPromptsSection = $(
+        `<div id="helper-prompts">
+            <button class="helper-prompt" data-message="What is Tray.ai?">What is Tray.ai?</button>
+            <button class="helper-prompt" data-message="How can I use AI for my job?">How can I use AI for my job?</button>
+            <button class="helper-prompt" data-message="What is iPaaS?">What is iPaaS?</button>
+        </div>`
+    );
+
+    // Find the form element and insert the chat window section and helper prompts above it
+    $('form').before(chatWindowSection).before(helperPromptsSection);
+
+    // Append the new button to the form
+    $('form').append(newButton);
+
+    // Function to send a message to the webhook
+    function sendMessage(userMessage) {
+        var chatWindow = $('#chat-window');
+        if (chatWindow.length === 0) {
+            console.error('Chat window not found');
+            return;
+        }
+
+        // Remove placeholders if they exist
+        chatWindow.find('.placeholder').remove();
+
+        // Display the user's message in the chat window immediately
+        chatWindow.append(
+            `<div class="chat-message chat-prompt" style="align-self: flex-start;">
+                <p>${userMessage}</p>
+            </div>`
+        );
+
+        // Scroll to the bottom of the chat window
+        chatWindow.scrollTop(chatWindow[0].scrollHeight);
+
+        // Wait for a short moment before showing the "Thinking..." message
+        setTimeout(function() {
+            // Display the "Thinking..." message with a fade-in effect
+            chatWindow.append(
+                `<div class="chat-message chat-response thinking" style="display:none; align-self: flex-end;">
+                    <p>Thinking...</p>
+                </div>`
+            );
+            chatWindow.find('.thinking').fadeIn('slow');
+
+            // Scroll to the bottom of the chat window
+            chatWindow.scrollTop(chatWindow[0].scrollHeight);
+
+            // Change button text to "Thinking..." and disable it
+            newButton.text('Thinking...').prop('disabled', true);
+
+            // Construct the query string with the form input and session ID
+            var queryString = $.param({
+                message: userMessage,
+                sessionId: sessionId
+            });
+
+            // Updated webhook URL with query string
+            var webhookUrl = 'https://0765a9ad-3d21-489d-8388-aad4fb3b0c59.trayapp.io?' + queryString;
+
+            $.ajax({
+                url: webhookUrl,
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    console.log('Response:', response); // Log the full response
+
+                    var chatContent = response.chat; // Get the HTML content for the chat
+
+                    if (!chatContent) {
+                        console.error('No chat content found');
+                        return;
+                    }
+
+                    // Remove the "Thinking..." message
+                    chatWindow.find('.thinking').remove();
+
+                    // Append the response content to the chat window
+                    chatWindow.append(
+                        `<div class="chat-message chat-response" style="align-self: flex-end;">
+                            ${chatContent}
+                        </div>`
+                    );
+
+                    // Scroll to the bottom of the chat window
+                    chatWindow.scrollTop(chatWindow[0].scrollHeight);
+
+                    // Optionally, clear the input field
+                    $('textarea[name="Chat"]').val('');
+
+                    // Reset the button text and re-enable it
+                    newButton.text('Send Chat').prop('disabled', false);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error fetching data from the webhook:', error);
+                    $('.container.content').append($('<div></div>').text('Error loading data.'));
+
+                    // Remove the "Thinking..." message
+                    chatWindow.find('.thinking').remove();
+
+                    // Reset the button text and re-enable it
+                    newButton.text('Send Chat').prop('disabled', false);
+                }
+            });
+        }, 500); // Adjust the delay time as needed
+    }
+
+    // Add click event to the new button
+    newButton.on('click', function() {
+        var userMessage = $('textarea[name="Chat"]').val(); // Capture form input
+        if (userMessage.trim()) {
+            sendMessage(userMessage);
+        }
+    });
+
+    // Add click event to the helper prompts
+    $(document).on('click', '.helper-prompt', function() {
+        var message = $(this).data('message'); // Get the predefined message
+        sendMessage(message);
+    });
+
+    // Handle sending messages on Enter key press
+    $(document).on('keypress', 'textarea[name="Chat"]', function(e) {
+        if (e.which === 13 && !e.shiftKey) {
+            e.preventDefault(); // Prevent new line
+            var userMessage = $(this).val();
+            if (userMessage.trim()) {
+                sendMessage(userMessage);
+            }
+        }
+    });
+});
