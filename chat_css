@@ -1,69 +1,123 @@
-.hero{display:none !important;}
-#page{padding-bottom: 297px !important;}
-.helper-prompt{padding: 10px;
-    border: 0px;}
+/*==================================
+  1. RESET & GENERAL PAGE LAYOUT
+==================================*/
+/* Remove default hero section */
+.hero {
+    display: none !important;
+}
 
-        #chat-window {
-            width: 100%;
-            height: 600px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            padding: 10px;
-            background-color: #f9f9f9;
-            overflow-y: scroll;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+/* Adjust main page container spacing */
+#page {
+    padding-bottom: 297px !important;
+}
 
-        .chat-message {
-            display: flex;
-            flex-direction: column;
-            max-width: 70%;
-            padding: 8px;
-            border-radius: 8px;
-            margin: 5px 0;
-        }
+/* Style for helper prompts */
+.helper-prompt {
+    padding: 10px;
+    border: 0px;
+}
 
-        .chat-prompt {
-            align-self: flex-start;
-            background-color: #e0e0e0;
-            color: #333;
-        }
-
-        .chat-response {
-            align-self: flex-end;
-            background-color: #0084ff;
-            color: white;
-        }
-
+/* Hide default submit button */
 button[type="submit"].button.is-primary.is-pulled-right {
     display: none;
+}
 
+/*==================================
+  2. CHAT WINDOW CONTAINER
+==================================*/
+#chat-window {
+    /* Container dimensions */
+    width: 100%;
+    height: 600px;
+    
+    /* Border and background */
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    
+    /* Scroll behavior */
+    overflow-y: scroll;
+    
+    /* Layout structure */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/*==================================
+  3. MESSAGE BUBBLES
+==================================*/
+/* Base message structure - standardized for all bubbles */
+.chat-message {
+    display: block;
+    flex-direction: column;
+    max-width: 70%;
+    border-radius: 8px;
+    padding: 8px 12px;  
+    margin: 4px 0;     
+}
+
+/* User message styling */
 .chat-prompt {
     align-self: flex-start;
+    background-color: #e0e0e0;
+    color: #333;
     text-align: left;
 }
 
+/* Bot message styling */
 .chat-response {
     align-self: flex-end;
-    text-align: right;
+    background-color: #0084ff;
+    color: white;
+    text-align: left;
+    width: fit-content;
 }
 
- .placeholder{
-background-color: #7a7a7a !important;
+/* Bot message states - keeping consistent padding/margin */
+.chat-response.placeholder {
+    background-color: #0084ff !important;
+    color: white !important;
 }
 
-/* Default paragraph styles */
+.chat-response.placeholder p {
+    color: white !important;
+    margin: 0;    
+    padding: 0;     
+}
+
+.chat-response.thinking {
+    background-color: #0084ff !important;
+}
+
+.chat-response.thinking p {
+    color: white !important;
+    margin: 0;  
+    padding: 0;
+}
+
+/* Message content styling */
+.chat-message p {
+    margin: 0; 
+    padding: 0; 
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+/*==================================
+  4. TYPOGRAPHY
+==================================*/
+/* General paragraph formatting - for content outside bubbles */
 p {
-    margin-bottom: 10px;
+    margin-bottom: 5px;
     padding: 5px;
     line-height: 1.6;
     font-size: 14px;
     color: #333;
 }
 
-/* Styling for links in the chat */
+/* Link styling */
 a {
     color: #007bff;
     text-decoration: none;
@@ -73,18 +127,21 @@ a:hover {
     text-decoration: underline;
 }
 
-/* Default bullet/ul list style */
+/*==================================
+  5. LIST ELEMENTS
+==================================*/
+/* Unordered list style */
 ul {
     list-style-type: disc;
     padding-left: 20px;
 }
 
-li {
+ul li {
     margin-bottom: 5px;
     font-size: 14px;
 }
 
-/* Styling ordered lists */
+/* Ordered list style */
 ol {
     list-style-type: decimal;
     padding-left: 20px;
@@ -95,7 +152,10 @@ ol li {
     font-size: 14px;
 }
 
-/* Styling for chat buttons (optional if you have buttons) */
+/*==================================
+  6. INTERACTIVE ELEMENTS
+==================================*/
+/* Button appearance */
 button {
     padding: 8px 12px;
     background-color: #007bff;
@@ -103,3 +163,4 @@ button {
     color: white;
     border-radius: 5px;
     cursor: pointer;
+}
