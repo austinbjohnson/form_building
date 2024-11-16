@@ -1,0 +1,105 @@
+.hero{display:none !important;}
+#page{padding-bottom: 297px !important;}
+.helper-prompt{padding: 10px;
+    border: 0px;}
+
+        #chat-window {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            overflow-y: scroll;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .chat-message {
+            display: flex;
+            flex-direction: column;
+            max-width: 70%;
+            padding: 8px;
+            border-radius: 8px;
+            margin: 5px 0;
+        }
+
+        .chat-prompt {
+            align-self: flex-start;
+            background-color: #e0e0e0;
+            color: #333;
+        }
+
+        .chat-response {
+            align-self: flex-end;
+            background-color: #0084ff;
+            color: white;
+        }
+
+button[type="submit"].button.is-primary.is-pulled-right {
+    display: none;
+
+.chat-prompt {
+    align-self: flex-start;
+    text-align: left;
+}
+
+.chat-response {
+    align-self: flex-end;
+    text-align: right;
+}
+
+ .placeholder{
+background-color: #7a7a7a !important;
+}
+
+/* Default paragraph styles */
+p {
+    margin-bottom: 10px;
+    padding: 5px;
+    line-height: 1.6;
+    font-size: 14px;
+    color: #333;
+}
+
+/* Styling for links in the chat */
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Default bullet/ul list style */
+ul {
+    list-style-type: disc;
+    padding-left: 20px;
+}
+
+li {
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+/* Styling ordered lists */
+ol {
+    list-style-type: decimal;
+    padding-left: 20px;
+}
+
+ol li {
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+/* Styling for chat buttons (optional if you have buttons) */
+button {
+    padding: 8px 12px;
+    background-color: #007bff;
+    border: none;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
