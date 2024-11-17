@@ -64,12 +64,17 @@ $(document).ready(function() {
 
         // Wait for a short moment before showing the "Thinking..." message
         setTimeout(function() {
-            // Display the "Thinking..." message with a fade-in effect
+            // Display the loading indicator with a fade-in effect
             chatWindow.append(
                 `<div class="chat-message chat-response thinking" style="display:none; align-self: flex-end;">
-                    <p>Thinking...</p>
+                    <div class="loading-indicator">
+                        <span class="loading-dot"></span>
+                        <span class="loading-dot"></span>
+                        <span class="loading-dot"></span>
+                    </div>
                 </div>`
             );
+          
             chatWindow.find('.thinking').fadeIn('slow');
 
             // Scroll to the bottom of the chat window
