@@ -1,0 +1,721 @@
+{
+    "tray_export_version": 4,
+    "export_type": "project",
+    "workflows": [
+        {
+            "id": "09ad1a4a-8d86-41ba-892b-1a27bd6646e0",
+            "created": "2024-11-16T22:06:23.510235Z",
+            "workspace_id": "edb0fc26-a303-4a07-b892-93556f2f88ad",
+            "project_id": "2527984d-8652-40bf-9323-56840fe77f95",
+            "group": "60aab717-346d-4c0a-9ce5-230f03bfbde3",
+            "creator": "6c94d0d3-2a4f-4640-ac2d-d12e63bf9dcd",
+            "version": {
+                "id": "37a954e3-37da-4487-93de-cc1b4ff5a7aa",
+                "created": "2024-11-17T00:29:13.688336Z"
+            },
+            "title": "Form - Chat Interface",
+            "enabled": true,
+            "tags": [],
+            "settings": {
+                "config": {},
+                "input_schema": {},
+                "output_schema": {}
+            },
+            "steps_structure": [
+                {
+                    "name": "trigger",
+                    "type": "normal",
+                    "content": {}
+                }
+            ],
+            "steps": {
+                "trigger": {
+                    "title": "Form Trigger",
+                    "connector": {
+                        "name": "form-trigger",
+                        "version": "1.7"
+                    },
+                    "operation": "init",
+                    "output_schema": {
+                        "$schema": "http://json-schema.org/draft-04/schema#",
+                        "type": "object",
+                        "properties": {
+                            "result": {
+                                "type": "object",
+                                "properties": {
+                                    "Chat": {
+                                        "type": "string",
+                                        "title": "Chat"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "error_handling": {},
+                    "authentication": {
+                        "group": "5f0f9aa0-b5cb-4f72-a1f5-a81020bc867d",
+                        "title": "01 knowledge agent template",
+                        "service_icon": {
+                            "icon_type": "url",
+                            "value": "//s3.amazonaws.com/images.tray.io/artisan/icons/0077677c-6f3e-4937-a914-30642ef48415.png"
+                        },
+                        "scopes": [],
+                        "service_name": "ai-agent-utils",
+                        "service_version": 1
+                    },
+                    "properties": {
+                        "form_title": {
+                            "type": "string",
+                            "value": "Chat Demo"
+                        },
+                        "extra_js": {
+                            "type": "string",
+                            "value": "$(document).ready(function() {\n    // Function to generate a unique session ID\n    function generateSessionId() {\n        return 'session-' + new Date().getTime() + '-' + Math.floor(Math.random() * 10000);\n    }\n\n    // Generate a unique session ID for this page load\n    var sessionId = generateSessionId();\n\n    // Hide the original submit button\n    $('button[type=\"submit\"]').hide();\n\n    // Create and insert a new button for triggering the AJAX request\n    var newButton = $('<button type=\"button\" class=\"button is-primary is-pulled-right\">Send Chat</button>');\n\n    // Create the chat window content as a jQuery object \n    var chatWindowSection = $(\n        `<section id=\"chat-window\" class=\"box form-control\">\n            <!-- Placeholder content -->\n            <div class=\"chat-message chat-response placeholder\" style=\"align-self: flex-end;\">\n                <p>Let's Get a demo going!</p>\n            </div>\n\n        </section>`\n        \n    );\n   \n\n    // Create the helper prompts section\n    var helperPromptsSection = $(\n        `<div id=\"helper-prompts\">\n            <button class=\"helper-prompt\" data-message=\"What is Tray.ai?\">What is Tray.ai?</button>\n            <button class=\"helper-prompt\" data-message=\"How can I use AI for my job?\">How can I use AI for my job?</button>\n            <button class=\"helper-prompt\" data-message=\"What is iPaaS?\">What is iPaaS?</button>\n        </div>`\n    );\n\n    // Find the form element and insert the chat window section and helper prompts above it\n    $('form').before(chatWindowSection).before(helperPromptsSection);\n\n    // Append the new button to the form\n    $('form').append(newButton);\n\n    // Function to send a message to the webhook\n    function sendMessage(userMessage) {\n        var chatWindow = $('#chat-window');\n        if (chatWindow.length === 0) {\n            console.error('Chat window not found');\n            return;\n        }\n\n        // Remove placeholders if they exist\n        chatWindow.find('.placeholder').remove();\n\n        // Display the user's message in the chat window immediately\n        chatWindow.append(\n            `<div class=\"chat-message chat-prompt\" style=\"align-self: flex-start;\">\n                <p>${userMessage}</p>\n            </div>`\n        );\n\n        // Scroll to the bottom of the chat window\n        chatWindow.scrollTop(chatWindow[0].scrollHeight);\n\n        // Wait for a short moment before showing the \"Thinking...\" message\n        setTimeout(function() {\n            // Display the loading indicator with a fade-in effect\n            chatWindow.append(\n                `<div class=\"chat-message chat-response thinking\" style=\"display:none; align-self: flex-end;\">\n                    <div class=\"loading-indicator\">\n                        <span class=\"loading-dot\"></span>\n                        <span class=\"loading-dot\"></span>\n                        <span class=\"loading-dot\"></span>\n                    </div>\n                </div>`\n            );\n          \n            chatWindow.find('.thinking').fadeIn('slow');\n\n            // Scroll to the bottom of the chat window\n            chatWindow.scrollTop(chatWindow[0].scrollHeight);\n\n            // Change button text to \"Thinking...\" and disable it\n            newButton.text('Thinking...').prop('disabled', true);\n\n            // Construct the query string with the form input and session ID\n            var queryString = $.param({\n                message: userMessage,\n                sessionId: sessionId\n            });\n\n            // Updated webhook URL with query string\n            var webhookUrl = 'https://0765a9ad-3d21-489d-8388-aad4fb3b0c59.trayapp.io?' + queryString;\n\n            $.ajax({\n                url: webhookUrl,\n                type: 'GET',\n                dataType: 'json',\n                success: function(response) {\n                    console.log('Response:', response); // Log the full response\n\n                    var chatContent = response.chat; // Get the HTML content for the chat\n\n                    if (!chatContent) {\n                        console.error('No chat content found');\n                        return;\n                    }\n\n                    // Remove the \"Thinking...\" message\n                    chatWindow.find('.thinking').remove();\n\n                    // Append the response content to the chat window\n                    chatWindow.append(\n                        `<div class=\"chat-message chat-response\" style=\"align-self: flex-end;\">\n                            ${chatContent}\n                        </div>`\n                    );\n\n                    // Scroll to the bottom of the chat window\n                    chatWindow.scrollTop(chatWindow[0].scrollHeight);\n\n                    // Optionally, clear the input field\n                    $('textarea[name=\"Chat\"]').val('');\n\n                    // Reset the button text and re-enable it\n                    newButton.text('Send Chat').prop('disabled', false);\n                },\n                error: function(xhr, status, error) {\n                    console.error('Error fetching data from the webhook:', error);\n                    $('.container.content').append($('<div></div>').text('Error loading data.'));\n\n                    // Remove the \"Thinking...\" message\n                    chatWindow.find('.thinking').remove();\n\n                    // Reset the button text and re-enable it\n                    newButton.text('Send Chat').prop('disabled', false);\n                }\n            });\n        }, 500); // Adjust the delay time as needed\n    }\n\n    // Add click event to the new button\n    newButton.on('click', function() {\n        var userMessage = $('textarea[name=\"Chat\"]').val(); // Capture form input\n        if (userMessage.trim()) {\n            sendMessage(userMessage);\n        }\n    });\n\n    // Add click event to the helper prompts\n    $(document).on('click', '.helper-prompt', function() {\n        var message = $(this).data('message'); // Get the predefined message\n        sendMessage(message);\n    });\n\n    // Handle sending messages on Enter key press\n    $(document).on('keypress', 'textarea[name=\"Chat\"]', function(e) {\n        if (e.which === 13 && !e.shiftKey) {\n            e.preventDefault(); // Prevent new line\n            var userMessage = $(this).val();\n            if (userMessage.trim()) {\n                sendMessage(userMessage);\n            }\n        }\n    });\n});"
+                        },
+                        "extra_css": {
+                            "type": "string",
+                            "value": "/*==================================\n  1. RESET & GENERAL PAGE LAYOUT\n==================================*/\n/* Remove default hero section */\n.hero {\n    display: none !important;\n}\n\n/* Adjust main page container spacing */\n#page {\n    padding-bottom: 297px !important;\n}\n\n/* Style for helper prompts */\n.helper-prompt {\n    padding: 10px;\n    border: 0px;\n}\n\n/* Hide default submit button */\nbutton[type=\"submit\"].button.is-primary.is-pulled-right {\n    display: none;\n}\n\n/*==================================\n  2. CHAT WINDOW CONTAINER\n==================================*/\n#chat-window {\n    /* Container dimensions */\n    width: 100%;\n    height: 600px;\n    \n    /* Border and background */\n    border: 1px solid #ccc;\n    border-radius: 8px;\n    padding: 10px;\n    background-color: #f9f9f9;\n    \n    /* Scroll behavior */\n    overflow-y: scroll;\n    \n    /* Layout structure */\n    display: flex;\n    flex-direction: column;\n    gap: 10px;\n}\n\n/*==================================\n  3. MESSAGE BUBBLES\n==================================*/\n/* Base message structure - standardized for all bubbles */\n.chat-message {\n    display: block;\n    flex-direction: column;\n    max-width: 70%;\n    border-radius: 8px;\n    padding: 8px 12px;  \n    margin: 4px 0;     \n}\n\n/* User message styling */\n.chat-prompt {\n    align-self: flex-start;\n    background-color: #e0e0e0;\n    color: #333;\n    text-align: left;\n}\n\n/* Bot message styling */\n.chat-response {\n    align-self: flex-end;\n    background-color: #0084ff;\n    color: white; !important;\n    text-align: left;\n    width: fit-content;\n}\n\n/* Force white text for all elements inside chat-response */\n.chat-response * {\n    color: white !important;\n}\n\n/* Bot message states - keeping consistent padding/margin */\n.chat-response.placeholder {\n    background-color: #0084ff !important;\n    color: white !important;\n}\n\n.chat-response.placeholder p {\n    color: white !important;\n    margin: 0;    \n    padding: 0;     \n}\n\n.chat-response.thinking {\n    background-color: #0084ff !important;\n}\n\n.chat-response.thinking p {\n    color: white !important;\n    margin: 0;  \n    padding: 0;\n}\n\n/* Message content styling */\n.chat-message p {\n    margin: 0; \n    padding: 0; \n    line-height: 1.6;\n    font-size: 14px;\n}\n\n/*==================================\n  4. TYPOGRAPHY\n==================================*/\n/* General paragraph formatting - for content outside bubbles */\np {\n    margin-bottom: 5px;\n    padding: 5px;\n    line-height: 1.6;\n    font-size: 14px;\n    color: #333;\n}\n\n/* Link styling */\na {\n    color: #007bff;\n    text-decoration: none;\n}\n\na:hover {\n    text-decoration: underline;\n}\n\n/*==================================\n  5. LIST ELEMENTS\n==================================*/\n/* Unordered list style */\nul {\n    list-style-type: disc;\n    padding-left: 20px;\n}\n\nul li {\n    margin-bottom: 5px;\n    font-size: 14px;\n}\n\n/* Ordered list style */\nol {\n    list-style-type: decimal;\n    padding-left: 20px;\n}\n\nol li {\n    margin-bottom: 5px;\n    font-size: 14px;\n}\n\n/*==================================\n  6. INTERACTIVE ELEMENTS\n==================================*/\n/* Button appearance */\nbutton {\n    padding: 8px 12px;\n    background-color: #007bff;\n    border: none;\n    color: white;\n    border-radius: 5px;\n    cursor: pointer;\n}\n\n/*==================================\n  7. LOADING VISUAL\n==================================*/\n\n@keyframes loadingBounce {\n    0%, 100% { \n        transform: translateY(0);\n    }\n    50% { \n        transform: translateY(-7px);\n    }\n}\n\n.loading-dot {\n    width: 5px;\n    height: 5px;\n    background-color: white;\n    border-radius: 50%;\n    display: inline-block;\n    margin: 0 2px;\n    animation: loadingBounce 1s infinite;\n}\n\n.loading-dot:nth-child(2) {\n    animation-delay: 150ms;\n}\n\n.loading-dot:nth-child(3) {\n    animation-delay: 300ms;\n}\n\n.chat-response.thinking {\n    background-color: #0084ff !important;\n    padding: 8px 12px;\n    min-width: 50px;\n}\n\n.loading-indicator {\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    min-height: 24px;\n}"
+                        },
+                        "form_fields": {
+                            "type": "array",
+                            "value": [
+                                {
+                                    "type": "object",
+                                    "value": {
+                                        "type_paragraph_text_name": {
+                                            "type": "string",
+                                            "value": "Chat"
+                                        },
+                                        "title": {
+                                            "type": "string",
+                                            "value": "Chat"
+                                        },
+                                        "description": {
+                                            "type": "string",
+                                            "value": ""
+                                        },
+                                        "required": {
+                                            "type": "boolean",
+                                            "value": true
+                                        },
+                                        "dependent": {
+                                            "type": "object",
+                                            "value": {
+                                                "name": {
+                                                    "type": "string",
+                                                    "value": ""
+                                                },
+                                                "value": {
+                                                    "type": "string",
+                                                    "value": ""
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        "form_description": {
+                            "type": "string",
+                            "value": ""
+                        }
+                    }
+                }
+            },
+            "dependencies": []
+        },
+        {
+            "id": "10099d7c-d98e-43d0-a48d-f021067684ff",
+            "created": "2024-11-16T22:22:23.383459Z",
+            "workspace_id": "edb0fc26-a303-4a07-b892-93556f2f88ad",
+            "project_id": "2527984d-8652-40bf-9323-56840fe77f95",
+            "group": "d98bc253-6a22-4fa4-9826-fdd8c836077f",
+            "creator": "6c94d0d3-2a4f-4640-ac2d-d12e63bf9dcd",
+            "version": {
+                "id": "b89fda3a-c335-46cb-8dd6-cb0c45e1cba7",
+                "created": "2024-11-17T00:45:29.399955Z"
+            },
+            "title": "Webhook Router",
+            "enabled": true,
+            "tags": [],
+            "settings": {
+                "config": {},
+                "input_schema": {},
+                "output_schema": {}
+            },
+            "steps_structure": [
+                {
+                    "name": "trigger",
+                    "type": "normal",
+                    "content": {}
+                },
+                {
+                    "name": "storage-5",
+                    "type": "normal",
+                    "content": {}
+                },
+                {
+                    "name": "boolean-condition-1",
+                    "type": "branch",
+                    "content": {
+                        "true": [
+                            {
+                                "name": "http-client-1",
+                                "type": "normal",
+                                "content": {}
+                            }
+                        ],
+                        "false": [
+                            {
+                                "name": "storage-1",
+                                "type": "normal",
+                                "content": {}
+                            },
+                            {
+                                "name": "storage-2",
+                                "type": "normal",
+                                "content": {}
+                            },
+                            {
+                                "name": "storage-3",
+                                "type": "normal",
+                                "content": {}
+                            },
+                            {
+                                "name": "merlin-generation-1",
+                                "type": "normal",
+                                "content": {}
+                            },
+                            {
+                                "name": "storage-4",
+                                "type": "normal",
+                                "content": {}
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "trigger-reply-1",
+                    "type": "normal",
+                    "content": {}
+                }
+            ],
+            "steps": {
+                "boolean-condition-1": {
+                    "title": "Use Agent?",
+                    "connector": {
+                        "name": "boolean-condition",
+                        "version": "2.3"
+                    },
+                    "operation": "boolean_condition",
+                    "output_schema": {},
+                    "error_handling": {},
+                    "properties": {
+                        "conditions": {
+                            "type": "array",
+                            "value": [
+                                {
+                                    "type": "object",
+                                    "value": {
+                                        "value1": {
+                                            "type": "jsonpath",
+                                            "value": "$.steps.storage-5.value"
+                                        },
+                                        "comparison_type": {
+                                            "type": "string",
+                                            "value": "==="
+                                        },
+                                        "value2": {
+                                            "type": "boolean",
+                                            "value": true
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        "strictness": {
+                            "type": "string",
+                            "value": "All"
+                        }
+                    }
+                },
+                "http-client-1": {
+                    "title": "Agent 01",
+                    "connector": {
+                        "name": "http-client",
+                        "version": "5.6"
+                    },
+                    "operation": "post_request",
+                    "output_schema": {
+                        "$schema": "http://json-schema.org/draft-04/schema#",
+                        "type": "object",
+                        "properties": {
+                            "response": {
+                                "type": "object",
+                                "properties": {
+                                    "status_code": {
+                                        "type": "number"
+                                    },
+                                    "headers": {
+                                        "type": "object",
+                                        "properties": {
+                                            "date": {
+                                                "type": "string"
+                                            },
+                                            "content-type": {
+                                                "type": "string"
+                                            },
+                                            "content-length": {
+                                                "type": "string"
+                                            },
+                                            "connection": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    },
+                                    "body": {
+                                        "type": "object",
+                                        "properties": {
+                                            "result": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "error_handling": {},
+                    "properties": {
+                        "auth": {
+                            "type": "object",
+                            "value": {
+                                "none": {
+                                    "type": "null",
+                                    "value": null
+                                }
+                            }
+                        },
+                        "follow_redirect": {
+                            "type": "boolean",
+                            "value": false
+                        },
+                        "follow_keep_method": {
+                            "type": "boolean",
+                            "value": false
+                        },
+                        "reject_unauthorized": {
+                            "type": "boolean",
+                            "value": true
+                        },
+                        "follow_authorization_header": {
+                            "type": "boolean",
+                            "value": false
+                        },
+                        "parse_response": {
+                            "type": "string",
+                            "value": "true"
+                        },
+                        "status_code": {
+                            "type": "object",
+                            "value": {
+                                "range": {
+                                    "type": "object",
+                                    "value": {
+                                        "from": {
+                                            "type": "integer",
+                                            "value": 200
+                                        },
+                                        "to": {
+                                            "type": "integer",
+                                            "value": 299
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "case_sensitive_headers": {
+                            "type": "boolean",
+                            "value": false
+                        },
+                        "url": {
+                            "type": "string",
+                            "value": "add_agent_api_here"
+                        },
+                        "headers": {
+                            "type": "array",
+                            "value": [
+                                {
+                                    "type": "object",
+                                    "value": {
+                                        "key": {
+                                            "type": "string",
+                                            "value": "Authorization"
+                                        },
+                                        "value": {
+                                            "type": "string",
+                                            "value": "Bearer {$.auth.access_token}"
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        "body": {
+                            "type": "object",
+                            "value": {
+                                "raw": {
+                                    "type": "object",
+                                    "value": {
+                                        "prompt": {
+                                            "type": "jsonpath",
+                                            "value": "$.steps.trigger.query.message"
+                                        },
+                                        "session_id": {
+                                            "type": "jsonpath",
+                                            "value": "$.steps.trigger.query.sessionId"
+                                        },
+                                        "tracing": {
+                                            "type": "jsonpath",
+                                            "value": "$.env"
+                                        },
+                                        "calling_interface": {
+                                            "type": "string",
+                                            "value": "html"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "merlin-generation-1": {
+                    "title": "Ungrounded Response",
+                    "connector": {
+                        "name": "merlin-generation",
+                        "version": "1.0"
+                    },
+                    "operation": "generate_text",
+                    "output_schema": {},
+                    "error_handling": {},
+                    "properties": {
+                        "temperature": {
+                            "type": "number",
+                            "value": 0.2
+                        },
+                        "max_tokens": {
+                            "type": "number",
+                            "value": 2000
+                        },
+                        "instructions": {
+                            "type": "string",
+                            "value": "{$.steps.trigger.query.message}\n\n<PAST CONVERSATION CONTEXT>\n{$.steps.storage-1.value}\n</ END of conversation>\n\n<format>Use simple HTML formatting tags</format>"
+                        }
+                    }
+                },
+                "storage-1": {
+                    "title": "Get Session",
+                    "connector": {
+                        "name": "storage",
+                        "version": "1.5"
+                    },
+                    "operation": "get",
+                    "output_schema": {},
+                    "error_handling": {},
+                    "properties": {
+                        "scope": {
+                            "type": "string",
+                            "value": "Workflow"
+                        },
+                        "key": {
+                            "type": "jsonpath",
+                            "value": "$.steps.trigger.query.sessionId"
+                        },
+                        "default_value": {
+                            "type": "null",
+                            "value": null
+                        }
+                    }
+                },
+                "storage-2": {
+                    "title": "Update Session",
+                    "connector": {
+                        "name": "storage",
+                        "version": "1.5"
+                    },
+                    "operation": "set",
+                    "output_schema": {},
+                    "error_handling": {},
+                    "properties": {
+                        "scope": {
+                            "type": "string",
+                            "value": "Workflow"
+                        },
+                        "key": {
+                            "type": "jsonpath",
+                            "value": "$.steps.trigger.query.sessionId"
+                        },
+                        "value": {
+                            "type": "string",
+                            "value": "{$.steps.storage-1.value}\nUser:  {$.steps.trigger.query.message}"
+                        }
+                    }
+                },
+                "storage-3": {
+                    "title": "Get Updated Session",
+                    "connector": {
+                        "name": "storage",
+                        "version": "1.5"
+                    },
+                    "operation": "get",
+                    "output_schema": {},
+                    "error_handling": {},
+                    "properties": {
+                        "scope": {
+                            "type": "string",
+                            "value": "Workflow"
+                        },
+                        "key": {
+                            "type": "jsonpath",
+                            "value": "$.steps.trigger.query.sessionId"
+                        },
+                        "default_value": {
+                            "type": "null",
+                            "value": null
+                        }
+                    }
+                },
+                "storage-4": {
+                    "title": "Update Session",
+                    "connector": {
+                        "name": "storage",
+                        "version": "1.5"
+                    },
+                    "operation": "set",
+                    "output_schema": {},
+                    "error_handling": {},
+                    "properties": {
+                        "scope": {
+                            "type": "string",
+                            "value": "Workflow"
+                        },
+                        "key": {
+                            "type": "jsonpath",
+                            "value": "$.steps.trigger.query.sessionId"
+                        },
+                        "value": {
+                            "type": "string",
+                            "value": "{$.steps.storage-3.value}\n\nAI: {$.steps.merlin-generation-1.response}"
+                        }
+                    }
+                },
+                "storage-5": {
+                    "title": "*Toggle - Use Agent?",
+                    "description": "*Update this step to TRUE to run the agent branch",
+                    "connector": {
+                        "name": "storage",
+                        "version": "1.5"
+                    },
+                    "operation": "get",
+                    "output_schema": {},
+                    "error_handling": {},
+                    "properties": {
+                        "scope": {
+                            "type": "string",
+                            "value": "Current Run"
+                        },
+                        "default_value": {
+                            "type": "boolean",
+                            "value": false
+                        },
+                        "key": {
+                            "type": "string",
+                            "value": "toggle"
+                        }
+                    }
+                },
+                "trigger": {
+                    "title": "Webhook",
+                    "connector": {
+                        "name": "webhook",
+                        "version": "2.3"
+                    },
+                    "operation": "webhook_with_response",
+                    "output_schema": {
+                        "$schema": "http://json-schema.org/draft-04/schema#",
+                        "type": "object",
+                        "properties": {
+                            "method": {
+                                "type": "string"
+                            },
+                            "path": {
+                                "type": "string"
+                            },
+                            "body": {
+                                "type": "string"
+                            },
+                            "query": {
+                                "type": "object",
+                                "properties": {
+                                    "message": {
+                                        "type": "string"
+                                    },
+                                    "sessionId": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "headers": {
+                                "type": "object",
+                                "properties": {
+                                    "x-forwarded-port": {
+                                        "type": "string"
+                                    },
+                                    "accept": {
+                                        "type": "string"
+                                    },
+                                    "sec-fetch-site": {
+                                        "type": "string"
+                                    },
+                                    "user-agent": {
+                                        "type": "string"
+                                    },
+                                    "sec-ch-ua-platform": {
+                                        "type": "string"
+                                    },
+                                    "remote-address": {
+                                        "type": "string"
+                                    },
+                                    "x-amzn-trace-id": {
+                                        "type": "string"
+                                    },
+                                    "sec-fetch-mode": {
+                                        "type": "string"
+                                    },
+                                    "origin": {
+                                        "type": "string"
+                                    },
+                                    "dnt": {
+                                        "type": "string"
+                                    },
+                                    "sec-ch-ua-mobile": {
+                                        "type": "string"
+                                    },
+                                    "accept-encoding": {
+                                        "type": "string"
+                                    },
+                                    "x-forwarded-for": {
+                                        "type": "string"
+                                    },
+                                    "sec-ch-ua": {
+                                        "type": "string"
+                                    },
+                                    "priority": {
+                                        "type": "string"
+                                    },
+                                    "accept-language": {
+                                        "type": "string"
+                                    },
+                                    "x-forwarded-proto": {
+                                        "type": "string"
+                                    },
+                                    "host": {
+                                        "type": "string"
+                                    },
+                                    "content-length": {
+                                        "type": "string"
+                                    },
+                                    "sec-fetch-dest": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "error_handling": {},
+                    "authentication": {
+                        "group": "ac2ad520-85f2-44e6-8f88-aaa47acebdfc",
+                        "title": "20241116 - CSRF",
+                        "service_icon": {
+                            "icon_type": "url",
+                            "value": "//s3.amazonaws.com/images.tray.io/artisan/icons/417d8650-7c1f-4bfa-b4f8-e6c63069e6c9.png"
+                        },
+                        "scopes": [],
+                        "service_name": "KzJyp_basic-http-bearer-token",
+                        "service_version": 1
+                    },
+                    "properties": {
+                        "allow_cors": {
+                            "type": "boolean",
+                            "value": false
+                        }
+                    }
+                },
+                "trigger-reply-1": {
+                    "title": "Trigger Event Reply",
+                    "connector": {
+                        "name": "trigger-reply",
+                        "version": "1.1"
+                    },
+                    "operation": "trigger-reply",
+                    "output_schema": {},
+                    "error_handling": {},
+                    "properties": {
+                        "status": {
+                            "value": 200,
+                            "type": "integer"
+                        },
+                        "body": {
+                            "type": "object",
+                            "value": {
+                                "PicklistValues": {
+                                    "type": "string",
+                                    "value": ""
+                                },
+                                "chat": {
+                                    "type": "jsonpath",
+                                    "value": "$.steps.http-client-1.response.body.result",
+                                    "fallback": {
+                                        "type": "jsonpath",
+                                        "value": "$.steps.merlin-generation-1.response"
+                                    }
+                                }
+                            }
+                        },
+                        "headers": {
+                            "type": "array",
+                            "value": [
+                                {
+                                    "type": "object",
+                                    "value": {
+                                        "key": {
+                                            "type": "string",
+                                            "value": "Access-Control-Allow-Origin"
+                                        },
+                                        "value": {
+                                            "type": "string",
+                                            "value": "*"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "dependencies": []
+        }
+    ],
+    "projects": [
+        {
+            "id": "2527984d-8652-40bf-9323-56840fe77f95",
+            "version": "1.2",
+            "name": "Chat Form Demo",
+            "config": {},
+            "workflows": [
+                "09ad1a4a-8d86-41ba-892b-1a27bd6646e0",
+                "10099d7c-d98e-43d0-a48d-f021067684ff"
+            ],
+            "dependencies": []
+        }
+    ]
+}
