@@ -70,9 +70,14 @@ button[type="submit"].button.is-primary.is-pulled-right {
 .chat-response {
     align-self: flex-end;
     background-color: #0084ff;
-    color: white;
+    color: white; !important;
     text-align: left;
     width: fit-content;
+}
+
+/* Force white text for all elements inside chat-response */
+.chat-response * {
+    color: white !important;
 }
 
 /* Bot message states - keeping consistent padding/margin */
